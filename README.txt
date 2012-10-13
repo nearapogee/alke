@@ -81,7 +81,7 @@ w = Widget[1] do |connection|
 end
 w.name # => "WonderKnife(tm)"
 
-w.__request__ # return faraday request
+w.__headers__ # return faraday headers
 w.__response__ # return faraday response
 w.__connection__ # returns faraday connection object 
   # that will be recycled and used on subsequent requests.
@@ -90,9 +90,9 @@ w.published_at # => nil
 w.publish 
 
 # find, returns a collection
-c = Widget[1,2,3]
+c = Widget.all
 
-c.request # return faraday request
+c.headers # return faraday headers
 c.response # return faraday response
 c.connection # returns faraday connection object 
   # that will not be reused by default for security
@@ -119,7 +119,7 @@ w = Widget.with(scope).random
 
 # query strings
 # /wigets?foo=bar&code=1a35de8c
-c = Widget.query(foo: 'bar', 'code' => '1a35de8c')
+c = Widget.all(foo: 'bar', 'code' => '1a35de8c')
 
 # /wigets/1?foo=bar&code=1a35de8c
 w = Widget[1, foo: 'bar', 'code' => '1a35de8c']
@@ -129,7 +129,7 @@ w = Widget[1, foo: 'bar', 'code' => '1a35de8c']
 
 # multipart
 
-# UploadIO comes form multipart-post
+# UploadIO comes from multipart-post
 w.image = Faraday::UploadIO.new("file.txt", "text/plain")
 w.image = Faraday::UploadIO.new(file_io, "text/plain", "file.txt")
 
