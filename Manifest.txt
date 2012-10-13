@@ -1,0 +1,8 @@
+.autotest
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/alke
+lib/alke.rb
+test/test_alke.rb
