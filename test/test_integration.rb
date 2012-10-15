@@ -17,7 +17,7 @@ class TestIntegration < MiniTest::Unit::TestCase
     end
   end
 
-  class Md5Signature < Faraday::Middleware
+  class ::Md5Signature < Faraday::Middleware
     def call(env)
       @app.call(env)
     end
@@ -106,7 +106,6 @@ class TestIntegration < MiniTest::Unit::TestCase
   end
 
   def test_save_with_middleware
-    skip
     w = Widget[1]
     new_price = w.price * 2
     w.price = new_price
@@ -114,7 +113,7 @@ class TestIntegration < MiniTest::Unit::TestCase
       with Md5Signature
     end
     assert_equal new_price, w.price
-    assert w.connection.builder.handlers.include?(Md5Signature)
+    assert w.connection.builder.handlers.include?(::Md5Signature)
     w.reload
     assert_equal new_price, w.price
   end

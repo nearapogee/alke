@@ -1,13 +1,17 @@
 module Alke
   module Client
+
     def self.included(receiver)
       receiver.extend         ClassMethods
       receiver.send :include, InstanceMethods
     end
 
     module ClassMethods
-      def adapter(adapter = nil)
-        @adapter ||= adapter || Faraday::Adapter::NetHttp
+      def adapter(adapter = Faraday.default_adapter)
+        if adapter.is_a? Symbol
+          adapter = Faraday::Adapter.lookup_middleware(adapter)
+        end
+        @adapter ||= adapter
       end
 
       def host(host = nil)
@@ -114,9 +118,10 @@ module Alke
       end
 
       def save(pass = true, &block)
+        # TODO pass - dup connection
         if block_given?
-          registry = Alke::MiddlewareRegistry.new(connection)
-          registry.update(block)
+          registry = Alke::MiddlewareRegistry.new(self)
+          registry.update(&block)
         end
         method      = persisted? ? :put : :post
         response    = connection.send(method, url, writable_attributes)
