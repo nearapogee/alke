@@ -28,7 +28,7 @@ class Widget
   schema do
     name :string
     published_at :datetime
-    image :multipart
+    image :file
   end
 
   middleware do
@@ -42,7 +42,7 @@ class Widget
 end
 
 w = Widget.new(name: "WonderKnife")
-w.saved? # => false
+w.persisted? # => false
 w.save # => true
 
 w.update(name: w.name + "(tm)")

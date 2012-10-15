@@ -5,6 +5,7 @@ require 'hoe'
 
 Hoe.plugin :git
 Hoe.plugin :isolate
+Hoe.plugin :minitest
 
 Hoe.spec 'alke' do
   developer("Matt Smith", "matt@nearapogee.com")
