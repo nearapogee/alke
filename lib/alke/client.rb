@@ -44,7 +44,7 @@ module Alke
 
       def schema(&block)
         parser = Alke::Schema::Parser.new
-        parser.instance_eval &block
+        parser.instance_eval(&block)
         @__parsed_schema__ = parser.parsed
         @__write_attributes__ = Array.new
         @__parsed_schema__.each do |attribute, options|
@@ -91,9 +91,7 @@ module Alke
       end
 
       def [](id, params = {})
-        response = connection.get do |req|
-          req.url url(id), params
-        end
+        response = connection.get url(id), params
         new(response.body)
       end
 
@@ -107,11 +105,17 @@ module Alke
         unserialize(attributes)
       end
 
+      def connection
+        @connection ||= self.class.connection
+      end
+
+      def url
+        self.class.url(id)
+      end
+
       def save
-        response = self.class.connection.post do |req|
-          req.url self.class.url(id)
-          req.body = self.writable_attributes
-        end
+        method      = persisted? ? :put : :post
+        response    = connection.send(method, url, writable_attributes)
         unserialize(response.body)
       end
 
@@ -133,6 +137,14 @@ module Alke
 
       def persisted?
         !id.nil?
+      end
+
+      def reload
+        return false unless persisted?
+        response = connection.get url
+        return false unless response.success?
+        unserialize(response.body)
+        true
       end
     end
     

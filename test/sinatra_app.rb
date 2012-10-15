@@ -12,7 +12,8 @@ DB.create_table? :widgets do
   DateTime :updated_at
 end
 class Widget < Sequel::Model; plugin :json_serializer, naked: true; end
-Widget.find_or_create(name: 'WonderKnife', price: 1000, stock: true, updated_at: Time.utc(2012, 1, 15, 13, 30))
+Widget.find_or_create(name: 'WonderKnife', price: 1000, \
+  stock: true, updated_at: Time.utc(2012, 1, 15, 13, 30))
 
 disable :show_exceptions
 before '/widget*' do

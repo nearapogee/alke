@@ -9,7 +9,11 @@ module Alke
       env[:request_headers][CONTENT_TYPE] ||= MIME_TYPE
       env[:body] = (env[:body] || {}).to_json
       @app.call(env).on_complete do
-        env[:body] = JSON.parse(env[:body])
+        begin
+          env[:body] = JSON.parse(env[:body])
+        rescue JSON::ParserError
+          env[:body] = {}
+        end
       end
     end
   end

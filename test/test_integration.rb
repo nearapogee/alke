@@ -58,13 +58,103 @@ class TestIntegration < MiniTest::Unit::TestCase
     assert !w2.respond_to?(:quantity)
   end
 
+  def test_save_new
+    w = Widget.new(name: "WonderDog", price: 10100, stock: false)
+    w.save
+    assert w.persisted?
+    assert Widget[w.id]
+  end
+
+  def test_save_persisted
+    w = Widget[1]
+    w.name = "WonderSaw"
+    w.save
+    assert_equal "WonderSaw", w.name
+    w = Widget[1]
+    assert_equal "WonderSaw", w.name
+  end
+
+  def test_reload
+    w1 = Widget[1]
+    w2 = Widget[1]
+    new_stock = !w2.stock
+    w2.stock = new_stock
+    w2.save
+    assert w2.stock != w1.stock
+    assert_equal true, w1.reload
+    assert_equal w2.stock, w1.stock
+  end
+
+  def test_reload_failed_request
+    w = Widget[1]
+    def w.url
+      "/wrong/1"
+    end
+    assert_equal false, w.reload
+  end
+
+  def test_reload_new
+    w = Widget.new
+    assert_equal false, w.reload
+  end
+
+  def test_save_with_middleware
+    skip
+    w = Widget[1]
+    new_price = w.price * 2
+    w.price = new_price
+    w.save do |c|
+      with Md5Signature
+    end
+    assert_equal new_price, w.price
+    assert w.connection.middleware.include?(Md5Signature)
+    w.reload
+    assert_equal new_price, w.price
+  end
+
   def test_create
-    w = Widget.create(
-      name: 'WonderRug',
-      price: 2000,
-      stock: true
-    )
+    w = Widget.create(name: 'WonderRug', price: 2000, stock: true)
     assert w.id
     assert w.persisted?
+  end
+
+  def test_create_with_middleware
+    skip
+    w = Widget.create(name: 'WonderDrug', price: 10000, stock: true) do |c|
+      with Md5Signature
+    end
+    assert w.persisted?
+    assert_equal Widget.connection.middleware, w.connection.middleware
+    assert !w.connection.middleware.include?(Md5Signature)
+  end
+
+  def test_update
+    skip
+    w = Widget[1]
+    new_name = w.name + "(tm)"
+    w.update(name: new_name)
+    assert_equal new_name, w.name
+    w.reload
+    assert_equal new_name, w.name
+  end
+
+  def test_update_with_middleware
+    skip
+    w = Widget[1]
+    new_name = w.name + "(tm)"
+    w.update(name: new_name) do |c|
+      with Md5Signature
+    end
+    assert_equal new_name, w.name
+    w.reload
+    assert_equal new_name, w.name
+  end
+
+  def test_destroy
+    skip
+    w = Widget.last
+    w.destroy
+    assert !Widget[w.id]
+    assert !Widget.exists?(w.id)
   end
 end
