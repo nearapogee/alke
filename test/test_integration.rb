@@ -17,6 +17,12 @@ class TestIntegration < MiniTest::Unit::TestCase
     end
   end
 
+  class Md5Signature < Faraday::Middleware
+    def call(env)
+      @app.call(env)
+    end
+  end
+
   def setup
     $live_warning ||= false
     unless ENV['LIVE'] == '1'
@@ -91,6 +97,7 @@ class TestIntegration < MiniTest::Unit::TestCase
       "/wrong/1"
     end
     assert_equal false, w.reload
+    assert w.id
   end
 
   def test_reload_new
@@ -107,7 +114,7 @@ class TestIntegration < MiniTest::Unit::TestCase
       with Md5Signature
     end
     assert_equal new_price, w.price
-    assert w.connection.middleware.include?(Md5Signature)
+    assert w.connection.builder.handlers.include?(Md5Signature)
     w.reload
     assert_equal new_price, w.price
   end

@@ -113,7 +113,11 @@ module Alke
         self.class.url(id)
       end
 
-      def save
+      def save(pass = true, &block)
+        if block_given?
+          registry = Alke::MiddlewareRegistry.new(connection)
+          registry.update(block)
+        end
         method      = persisted? ? :put : :post
         response    = connection.send(method, url, writable_attributes)
         unserialize(response.body)
